@@ -31,6 +31,27 @@ import {filterImageFromURL, deleteLocalFiles} from './util/util';
 
   //! END @TODO1
 
+  //Filtered image
+  app.get("/filteredimage", async(req: Request, res: Response) => {
+    const queryParams = req.query;
+    let filteredPath;
+    if(!queryParams || !queryParams.image_url || queryParams.image_url.trim().length <= 0) {
+      console.log('Invalid image url');
+      return res.status(400).send('Please enter a valid URL');
+    }
+    filterImageFromURL(queryParams.image_url).then((filteredPath) => {
+      filteredPath = filteredPath;
+      // Allow to respond before deleting local image
+      setTimeout(() => {
+        deleteLocalFiles([filteredPath]);
+      }, 10)
+      return res.status(200).sendFile(filteredPath);
+
+    }).catch(error => {
+      return res.status(422).send("Error in filtering image");
+    })
+  })
+
   // Root Endpoint
   // Displays a simple message to the user
   app.get( "/", async ( req, res ) => {
